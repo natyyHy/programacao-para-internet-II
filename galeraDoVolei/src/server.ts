@@ -1,7 +1,7 @@
 import express from "express";
 import type {Request, Response} from "express";
 import {z , ZodError} from 'zod';
-import { tr } from "zod/locales";
+
 
 // Funcao de gerar ID
 function gerarId(): string {
@@ -266,10 +266,185 @@ app.get('/jogadores/:id_jogador', (req: Request , res:Response) => {
 /*
     [6] GET - LISTAR SOLICITACOES - get/partidas/{id_partida}/solicitacoes
     params: id_partida
-    response: 200, 404
+    response: 200, 404, 400
 */
 
+const paramsSchemaListarSolicitacoes = z.object({
+    id_partida: z.string({message: 'O id da partida é obrigatorio'}).min(1)
+})
 
+app.get('/partidas/:id_partida/solicitacoes',(req: Request, res: Response) => {
+    
+    try {
+        const {id_partida} = paramsSchemaListarSolicitacoes.parse(req.params);
+        const solicitacoesPartida = solicitacoesBD.filter(sol => sol.id_partida === id_partida)
+
+        if(solicitacoesPartida.length === 0){
+            res.status(404).json({erro: 'Nenhuma solicitacao encontrada para essa partida'})
+        }
+
+        res.status(200).json(solicitacoesPartida)
+
+    } catch (error) {
+        if(error instanceof ZodError){
+            res.status(400).json({erro: 'Dados de entrada invalidos'})
+        }
+    }
+});
+
+
+/*
+    [7] GET - LISTAR PARTICIPANTES - get/partidas/{id_partida}/participantes
+    params: id_partida
+    response:  200,404,400
+*/
+
+const paramsSchemaListarParticipantes = z.object({
+    id_partida: z.string({message: 'O id da partida é obrigatorio'}).min(1)
+})
+
+app.get('/partidas/:id_partida/participantes', (req: Request, res: Response) => {
+    try {
+        const {id_partida} = paramsSchemaListarParticipantes.parse(req.params);
+        const participantesPartida = participantesBD.filter(part => part.id_partida === id_partida)
+
+        if(participantesPartida.length === 0){
+            res.status(404).json({erro: 'Nenhum participante encontrado para essa partida'})
+        }
+
+        res.status(200).json(participantesPartida)
+    } catch (error) {
+        if(error instanceof ZodError){
+            res.status(400).json({erro: 'Dados de entrada invalidos'})
+        }
+    }
+})
+
+/*
+    [8] PATCH - CANCELAR/ACEITAR SOLICITACAO - patch/partidas/{id_partida}/solicitacoes/{id_solicitacao}
+    params: id_partida, id_solicitacao
+    response:  200,404,400
+*/
+
+const paramsSchemaAlterarSolicitacao = z.object({
+    id_partida: z.string({message: 'O id da partida é obrigatorio'}).min(1),
+    id_solicitacao: z.string({message: 'O id da solicitacao é obrigatorio'}).min(1)
+})
+
+const bodySchemaAlterarSolicitacao = z.object({
+    status: z.enum(['aceita', 'recusada'], {message: 'O status deve ser aceita ou recusada'})
+})
+
+app.patch('/partidas/:id_partida/solicitacoes/:id_solicitacao', (req: Request, res: Response) => {
+    try {
+        const {id_partida, id_solicitacao} = paramsSchemaAlterarSolicitacao.parse(req.params);
+        const solicitacao = solicitacoesBD.find(sol => sol.id_solicitacao === id_solicitacao && sol.id_partida === id_partida)
+
+        if(!solicitacao){
+            res.status(404).json({erro: 'Solicitacao nao encontrada para essa partida'})
+        }
+
+        const {status} = bodySchemaAlterarSolicitacao.parse(req.body);
+        solicitacao!.status = status;
+        res.status(200).json({solicitacao})
+
+    } catch (error) {
+        if(error instanceof ZodError){
+            res.status(400).json({erro: 'Dados de entrada invalidos'})
+        }
+    }
+})
+
+/*
+    [9] PATCH - ATUALIZAR PARTIDA - patch/partidas/{id_partida}
+    params: id_partida
+    response:  200,404,400
+*/
+
+const paramsSchemaAtualizarPartida = z.object({
+    id_partida: z.string({message: 'O id da partida é obrigatorio'}).min(1)
+})
+
+const bodySchemaAtualizarPartida = z.object({
+    nome: z.string().min(3).optional(),
+    local: z.string().optional(),
+    data_hora: z.string().optional(),
+    categoria: z.string().optional(),
+    total_vagas: z.number().min(10).max(20).optional(),
+    preco_por_jogador: z.number().optional()
+})
+
+app.patch('/partidas/:id_partida', (req: Request, res: Response) => {
+    try {
+        const {id_partida} = paramsSchemaAtualizarPartida.parse(req.params);
+        const partida = partidasBD.find(part => part.id_partida === id_partida)
+
+        if(!partida){
+            res.status(404).json({erro: 'Partida nao encontrada'})
+        }
+
+        const bodyAtualizarPartida = bodySchemaAtualizarPartida.parse(req.body);
+
+        if(bodyAtualizarPartida.nome !== undefined){
+            partida!.nome = bodyAtualizarPartida.nome
+        }
+
+        if(bodyAtualizarPartida.local !== undefined){
+            partida!.local = bodyAtualizarPartida.local
+        }
+
+        if(bodyAtualizarPartida.data_hora !== undefined){
+            partida!.data_hora = bodyAtualizarPartida.data_hora
+        }
+
+        if(bodyAtualizarPartida.categoria !== undefined){
+            partida!.categoria = bodyAtualizarPartida.categoria
+        }
+
+        if(bodyAtualizarPartida.total_vagas !== undefined){
+            partida!.total_vagas = bodyAtualizarPartida.total_vagas
+        }
+
+        if(bodyAtualizarPartida.preco_por_jogador !== undefined){
+            partida!.preco_por_jogador = bodyAtualizarPartida.preco_por_jogador
+        }
+
+        res.status(200).json({partida})
+        
+    } catch (error) {
+        if(error instanceof ZodError){
+            res.status(400).json({erro: 'Dados de entrada invalidos'})
+        }
+    }
+})
+
+/*
+    [10] PATCH - DESISTIR PARTIDA - delete/partidas/{id_partida}/participantes/{id_jogador}
+    params: id_partida, id_jogador
+    response:  200,404,400
+*/
+
+const paramsSchemaDesistirPartida = z.object({
+    id_partida: z.string({message: 'O id da partida é obrigatorio'}).min(1),
+    id_jogador: z.string({message: 'O id do jogador é obrigatorio'}).min(1)
+})
+
+app.delete('/partidas/:id_partida/participantes/:id_jogador', (req: Request, res: Response) => {
+    try {
+        const {id_partida, id_jogador} = paramsSchemaDesistirPartida.parse(req.params);
+        const indexParticipante = participantesBD.findIndex(part => part.id_partida === id_partida && part.id_jogador === id_jogador)
+
+        if(indexParticipante === -1){
+            res.status(404).json({erro: 'Participante nao encontrado para essa partida'})
+        }
+        participantesBD.splice(indexParticipante, 1);
+        res.status(200).json({message: 'Participante removido com sucesso'})
+    }catch (error) {
+        if(error instanceof ZodError){
+            res.status(400).json({erro: 'Dados de entrada invalidos'})
+        }
+    }
+})
 
 // INICIALIZANDO...
 app.get('/', (req: Request, res: Response) => {
