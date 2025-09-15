@@ -2,7 +2,7 @@
 
 ## Jornada do usuario
 
-✅ 1 - Criar partidas → Jogador passa a ser organizador, partidas pode ter: ( local, numero de vagas, situacao( em adesao, confirmada, cancelada,encerrada ou realizada e em lista de espera), data, )
+✅ 1 - Criar partidas → Jogador passa a ser organizador, partidas pode ter: ( local, numero de vagas, situacao( em adesao, confirmada, cancelada,encerrada ou realizada e em lista de espera) )
 
 ✅ 3 - Buscar partidas (opcialmente filtrada)→ jogador pode visualizar a lista de partidas (de forma opcialmente filtrada: data, local ou em adesao) e entrar
 
@@ -22,3 +22,52 @@
 
 ✅ 11 - Jogador pode desistir da partida
 
+## API DOG Designer
+
+[✨ Link do API Dog](moqmhgh3ko.apidog.io)
+
+## Prints dos Endpoints (Insomnia)
+
+### POST /jogadores
+
+![Criar Jogador](printsInsomnia/criarjogador.jpg)
+
+### POST /partidas
+
+![Criar Partida](printsInsomnia/criarpartida.jpg)
+
+### GET /partidas
+
+![Listar Partidas](printsInsomnia/listarpartidas.jpg)
+
+### GET /partidas?filtros
+
+![Listar Partidas com Filtro](printsInsomnia/listarpartidasfiltro.jpg)
+
+### GET /jogadores/{id_jogador}
+
+![Visualizar Jogador](printsInsomnia/visualizarjogador.jpg)
+
+### POST /partidas/{id_partida}/solicitacoes
+
+![Pedir Solicitação](printsInsomnia/pedirsolicitacao.jpg)
+
+### GET /partidas/{id_partida}/solicitacoes
+
+![Listar Solicitação da Partida](printsInsomnia/listarsolicitacaopartida.jpg)
+
+### PATCH /partidas/{id_partida}/solicitacoes/{id_solicitacao} (Aceitar)
+
+![Aceitar Solicitação](printsInsomnia/aceitasolicitacao.jpg)
+
+### GET /partidas/{id_partida}/participantes
+
+![Listar Participantes](printsInsomnia/listarparticipante.jpg)
+
+### PATCH /partidas/{id_partida}
+
+![Atualizar Partida](printsInsomnia/attpartida.jpg)
+
+### DELETE /partidas/{id_partida}/participantes/{id_jogador}
+
+![Desistir da Partida](printsInsomnia/desistirpartida.jpg)

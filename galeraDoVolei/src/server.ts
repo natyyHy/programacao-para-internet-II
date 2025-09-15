@@ -1,6 +1,6 @@
 import express from "express";
 import type {Request, Response} from "express";
-import {z , ZodError} from 'zod';
+import { z , ZodError} from 'zod';
 
 
 // Funcao de gerar ID
@@ -124,6 +124,16 @@ app.post('/partidas', (req: Request, res: Response) => {
     try {
 
         const bodyPartida = criarPartidaSchema.parse(req.body);
+
+        //encontrar o jogador
+        const organizador = jogadoresBD.find(jog => jog.id_jogador === bodyPartida.id_organizador);
+        if(!organizador){
+            return res.status(404).json({erro: 'Organizador nao encontrado'})
+        }
+
+        //jogador passa ser organizador
+        organizador.organizador = true
+
         const novaPartida: Partida = {
             id_partida: gerarId(),
             situacao: 'em adesao',
@@ -175,10 +185,7 @@ app.post('/partidas/:id_partida/solicitacoes', (req: Request , res: Response) =>
         }
         solicitacoesBD.push(novaSolicitacao);
 
-        res.status(201).json({
-            mensagem: "Solicitacao criado com sucesso",
-            jogador: novaSolicitacao
-        });
+        res.status(201).json(novaSolicitacao);
 
     } catch (error){
         if(error instanceof ZodError) {
@@ -235,7 +242,7 @@ app.get('/partidas', (req: Request, res: Response) => {
 });
 
 /*
-    [5] GET - VISUALIZAR PERFIL JOGADOR - get//jogadores/{id_jogador}
+    [5] GET - VISUALIZAR PERFIL JOGADOR - get/jogadores/{id_jogador}
     params: id_jogador
     response: 200, 400, 404
 */
@@ -322,6 +329,7 @@ app.get('/partidas/:id_partida/participantes', (req: Request, res: Response) => 
 
 /*
     [8] PATCH - CANCELAR/ACEITAR SOLICITACAO - patch/partidas/{id_partida}/solicitacoes/{id_solicitacao}
+    body: status
     params: id_partida, id_solicitacao
     response:  200,404,400
 */
@@ -341,11 +349,35 @@ app.patch('/partidas/:id_partida/solicitacoes/:id_solicitacao', (req: Request, r
         const solicitacao = solicitacoesBD.find(sol => sol.id_solicitacao === id_solicitacao && sol.id_partida === id_partida)
 
         if(!solicitacao){
-            res.status(404).json({erro: 'Solicitacao nao encontrada para essa partida'})
+            res.status(404).json({erro: 'Solicitacao nao encontrada para essa partida'});
+            return
         }
 
         const {status} = bodySchemaAlterarSolicitacao.parse(req.body);
-        solicitacao!.status = status;
+
+        if(solicitacao.status === 'aceita' || solicitacao.status === 'recusada'){
+            return res.status(404).json({erro: `A solicitacao já foi ${status}`});
+        }
+
+        if(status === 'aceita'){
+            const partida = partidasBD.find(p => p.id_partida === id_partida);
+            if (!partida) {
+                return res.status(404).json({ erro: 'Partida associada não foi encontrada.' });
+            }
+
+            const novaParticipante: Participante = {
+                id_participante: gerarId(),
+                id_partida: id_partida,
+                id_jogador : solicitacao?.id_jogador,
+                data_confirmacao: String(new Date()),
+                preco_pagamento: partidasBD.find(partida => partida.id_partida === id_partida)?.preco_por_jogador || 0,
+                status_pagamento: 'pendente'
+            }
+            participantesBD.push(novaParticipante);
+        }
+
+        // para ambos casos
+        solicitacao.status = status;
         res.status(200).json({solicitacao})
 
     } catch (error) {
@@ -448,7 +480,7 @@ app.delete('/partidas/:id_partida/participantes/:id_jogador', (req: Request, res
 
 // INICIALIZANDO...
 app.get('/', (req: Request, res: Response) => {
-    res.send("API funcionando!...")
+    res.send("✨ API funcionando!...")
 });
 
 app.listen(PORTA, () => {
