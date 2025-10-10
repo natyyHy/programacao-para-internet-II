@@ -24,7 +24,7 @@
 
 ## API DOG Designer
 
-[✨ Link do API Dog](moqmhgh3ko.apidog.io)
+✨ Link do API Dog -> moqmhgh3ko.apidog.io
 
 ## Prints dos Endpoints (Insomnia)
 
