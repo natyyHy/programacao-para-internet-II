@@ -1,12 +1,13 @@
-import { Partida } from '../presentation/models/index.models.js'
+import { AtualizarPartida, Partida } from '../presentation/models/index.models.js'
 import { JogadorService } from './jogador.service.js'
+import {ParticipanteService} from './participante.service.js'
 import { gerarId } from '../presentation/utils/utils.js'
 
 export class PartidaService {
 
     private partidasBD: Partida[] = [];
 
-    constructor(private jogadorService: JogadorService) { }
+    constructor(private jogadorService: JogadorService,private participanteService : ParticipanteService) { }
 
     public criarPartida(bodyPartida: Partida): Partida | undefined {
 
@@ -68,37 +69,53 @@ export class PartidaService {
         return partidasFiltradas;
     }
 
-    public atualizar(idPartida : string, bodyPartida: Partida) : Partida | undefined {
-        const partida = partidasBD.find(part => part.id_partida === id_partida)
+    public atualizar(idPartida : string, bodyPartida: AtualizarPartida) : Partida | undefined {
+        const partida = this.partidasBD.find(part => part.id_partida === idPartida)
 
         if(!partida){
             return;
         }
 
-        
-
-        if(bodyAtualizarPartida.nome !== undefined){
-            partida!.nome = bodyAtualizarPartida.nome
+        if(bodyPartida.nome !== undefined){
+            partida!.nome = bodyPartida.nome
         }
 
-        if(bodyAtualizarPartida.local !== undefined){
-            partida!.local = bodyAtualizarPartida.local
+        if(bodyPartida.local !== undefined){
+            partida!.local = bodyPartida.local
         }
 
-        if(bodyAtualizarPartida.data_hora !== undefined){
-            partida!.data_hora = bodyAtualizarPartida.data_hora
+        if(bodyPartida.data_hora !== undefined){
+            partida!.data_hora = bodyPartida.data_hora
         }
 
-        if(bodyAtualizarPartida.categoria !== undefined){
-            partida!.categoria = bodyAtualizarPartida.categoria
+        if(bodyPartida.categoria !== undefined){
+            partida!.categoria = bodyPartida.categoria
         }
 
-        if(bodyAtualizarPartida.total_vagas !== undefined){
-            partida!.total_vagas = bodyAtualizarPartida.total_vagas
+        if(bodyPartida.total_vagas !== undefined){
+            partida!.total_vagas = bodyPartida.total_vagas
         }
 
-        if(bodyAtualizarPartida.preco_por_jogador !== undefined){
-            partida!.preco_por_jogador = bodyAtualizarPartida.preco_por_jogador
+        if(bodyPartida.preco_por_jogador !== undefined){
+            partida!.preco_por_jogador = bodyPartida.preco_por_jogador
         }
+
+        return partida;
+    }
+
+    public desistir(idPartida : string, idJogador : string) : boolean {
+
+        const indexParticipante = this.participanteService.buscarParticipante(idPartida,idJogador);
+
+        if(indexParticipante === -1){
+            return false;
+        }
+
+        this.participanteService.removerParticipante(indexParticipante)
+        return true;
+    }
+
+    public buscarPartidaId(idPartida : string) : Partida | undefined {
+        return this.partidasBD.find(part => part.id_partida === idPartida);
     }
 }

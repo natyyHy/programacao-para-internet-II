@@ -22,6 +22,15 @@ export interface Partida {
     preco_por_jogador: number
 };
 
+export type AtualizarPartida = {
+    nome?: string;
+    local?: string;
+    data_hora?: string;
+    categoria?: string;
+    total_vagas?: number;
+    preco_por_jogador?: number;
+}
+
 export interface Solicitacao {
     id_solicitacao: string,
     id_partida: string,
