@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export const paramsSchemaListarParticipantes = z.object({
+            id_partida: z.string({ message: 'O id da partida é obrigatorio' }).min(1)
+});
+
 export const criarJogadorSchema = z.object({
     nome: z.string().min(3, {message: 'O nome é obrigatorio ou deve ter no minimo 3 carac.'}),
     categoria: z.string({message: 'A categoria é obrigatoria'}),

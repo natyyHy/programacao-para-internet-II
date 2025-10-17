@@ -52,6 +52,7 @@ export class SolicitacaoService {
         }
 
         this.participanteService.adicionarParticipante(novoParticipante);
+        return solicitacao;
     }
 
     public recusar(idSolicitacao : string) : Solicitacao | undefined {

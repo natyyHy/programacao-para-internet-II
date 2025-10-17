@@ -9,7 +9,7 @@ export class JogadorController {
 
     }
 
-    public create = async (req: Request, res: Response) => {
+    public criar = async (req: Request, res: Response) => {
         try {
             const bodyJogador = criarJogadorSchema.parse(req.body);
             const novoJogador = this.jogadorService.criarJogador(bodyJogador);

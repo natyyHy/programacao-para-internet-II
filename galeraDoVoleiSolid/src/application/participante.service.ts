@@ -20,4 +20,8 @@ export class ParticipanteService {
     public adicionarParticipante(novoParticipante : Participante){
         this.participantesBD.push(novoParticipante);
     }
+
+    public listarPorPartida(idPartida : string) : Participante[] {
+        return this.participantesBD.filter(part => part.id_partida === idPartida);
+    }
 }

@@ -8,7 +8,7 @@ import type { Request, Response } from "express";
 export class PartidaController {
     constructor(private partidaService: PartidaService) { }
 
-    public create = async (req: Request, res: Response) => {
+    public criar = async (req: Request, res: Response) => {
         try {
             const bodyPartida = criarPartidaSchema.parse(req.body);
             const novaPartida = this.partidaService.criarPartida(bodyPartida);
@@ -65,24 +65,5 @@ export class PartidaController {
             return res.status(500).json({erro: 'Erro interno do servidor'})
         }
     }
-
-    public desistir = async (req: Request, res: Response) => {
-        try {
-            const {id_partida, id_jogador} = paramsSchemaDesistirPartida.parse(req.params);
-            const resultBool = this.partidaService.desistir(id_partida,id_jogador);
-
-            if(!resultBool){
-                res.status(404).json({erro: 'Participante nao encontrado para essa partida'})
-            }
-
-            res.status(200).json({message: 'Participante removido com sucesso'})
-
-        }catch (error) {
-            if(error instanceof ZodError){
-                res.status(400).json({erro: 'Dados de entrada invalidos'})
-            }
-        }
-    }
-
 
 }

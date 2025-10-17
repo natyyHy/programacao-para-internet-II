@@ -1,4 +1,4 @@
-import { AtualizarPartida, Partida } from '../presentation/models/index.models.js'
+import { AtualizarPartida, Partida , Participante,BodyPartida} from '../presentation/models/index.models.js'
 import { JogadorService } from './jogador.service.js'
 import {ParticipanteService} from './participante.service.js'
 import { gerarId } from '../presentation/utils/utils.js'
@@ -9,7 +9,7 @@ export class PartidaService {
 
     constructor(private jogadorService: JogadorService,private participanteService : ParticipanteService) { }
 
-    public criarPartida(bodyPartida: Partida): Partida | undefined {
+    public criarPartida(bodyPartida: BodyPartida): Partida | undefined {
 
         const organizador = this.jogadorService.buscarJogador(bodyPartida.id_organizador);
 
@@ -21,8 +21,8 @@ export class PartidaService {
 
         const novaPartida: Partida = {
             id_partida: gerarId(),
-            situacao: 'em adesao',
-            ...bodyPartida
+            ...bodyPartida,
+            situacao: 'em adesao'
         }
 
         this.partidasBD.push(novaPartida);
@@ -57,12 +57,8 @@ export class PartidaService {
         }
 
         if (filtros.situacao) {
-            partidasFiltradas = partidasFiltradas.filter(partida => 
-            {
-                if(partida.situacao == 'em adesao'|| partida.situacao == 'cancelada' || partida.situacao == 'confirmada'){
-                    partida.situacao.toLowerCase() === filtros.situacao!.toLowerCase();
-                }
-            }
+            partidasFiltradas = partidasFiltradas.filter(partida =>
+                partida.situacao.toLowerCase() === filtros.situacao!.toLowerCase()
             );
         }
 
@@ -117,5 +113,13 @@ export class PartidaService {
 
     public buscarPartidaId(idPartida : string) : Partida | undefined {
         return this.partidasBD.find(part => part.id_partida === idPartida);
+    }
+
+    public listarParticipantes(idPartida : string) : Participante[] | undefined {
+        const partida = this.buscarPartidaId(idPartida);
+        if(!partida){
+            return;
+        }
+        return this.participanteService.listarPorPartida(idPartida);
     }
 }

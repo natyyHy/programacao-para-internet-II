@@ -1,6 +1,16 @@
 
 // Interfaces - estrutura dos objetos
 
+export interface BodyPartida {
+    id_organizador: string,
+    nome: string,
+    local: string,
+    data_hora: string,
+    categoria: string,
+    total_vagas: number,
+    preco_por_jogador: number
+}
+
 export interface Jogador {
     id_jogador?: string,
     nome: string,
@@ -17,9 +27,9 @@ export interface Partida {
     local: string,
     data_hora: string,
     categoria: string,
-    situacao?: 'em adesao' | 'cancelada' | 'confirmada',
     total_vagas: number,
-    preco_por_jogador: number
+    preco_por_jogador: number,
+    situacao: 'em adesao' | 'cancelada' | 'confirmada'
 };
 
 export type AtualizarPartida = {
