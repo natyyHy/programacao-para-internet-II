@@ -1,12 +1,15 @@
 // CONFIGURACAO DO SERVIDOR
 
 import express from "express";
-import type {Request, Response} from "express";
-import {router} from './presentation/routes/index.routes.js';
-import { global_error_middleware } from "./presentation/middleware/global_error_exception.js";
-import { log_middleware } from "./presentation/middleware/log_middleware.js";
-// CONFIGURACAO
+import type { Request, Response } from "express";
+import { router } from './presentation/routes/index.routes.js';
+import { global_error_middleware } from "./presentation/middlewares/global_error_exception.js";
+import { log_middleware } from "./presentation/middlewares/log_middleware.js";
+import { translate_exception_middleware } from "./presentation/middlewares/translate_exception_middleware.js";
 
+
+
+// CONFIGURACAO
 const app = express();
 const PORTA = 3000;
 
@@ -19,7 +22,9 @@ app.use(log_middleware);
 // adicionar roteadores
 app.use(router);
 
-// tratamentos de erros globais
+// middlewares de erro
+// app.use(authMiddleware);
+app.use(translate_exception_middleware);
 app.use(global_error_middleware);
 
 // INICIALIZANDO...

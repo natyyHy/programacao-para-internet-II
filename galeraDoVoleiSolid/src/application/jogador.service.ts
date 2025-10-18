@@ -1,5 +1,6 @@
 import { Jogador } from '../presentation/models/index.models.js'
 import { gerarId } from '../presentation/utils/utils.js';
+import { NotFoundException } from './exceptions/notFoundExcepion.js';
 
 export class JogadorService {
 
@@ -20,22 +21,19 @@ export class JogadorService {
     }
 
     //buscar jogador
-    public buscarJogador(idJogador: string): Jogador | undefined {
+    public buscarJogador(idJogador: string): Jogador {
         const jogador = this.jogadoresBD.find(jog => jog.id_jogador === idJogador)
-        if (jogador) {
-            return jogador;
+        if (!jogador) {
+            throw new NotFoundException(`Jogador com ID ${idJogador} nao foi encontrado`);
         }
-        return;
+        return jogador;
     }
 
     //marcar jogador como organizador
     public marcarComoOrganizador(idJogador: string): boolean {
-        const jogador = this.jogadoresBD.find(jog => jog.id_jogador === idJogador);
-        if (jogador) {
-            jogador.organizador = true;
-            return true;
-        }
-        return false;
+        const jogador = this.buscarJogador(idJogador);
+        jogador.organizador = true;
+        return true;
     }
 
 }

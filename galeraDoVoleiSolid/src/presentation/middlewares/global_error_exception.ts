@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { HTTPException } from "../exceptions/HTTPException.js";
+import { ZodError } from "zod";
 
 export function global_error_middleware(
   error : any,
@@ -8,10 +9,11 @@ export function global_error_middleware(
   next: NextFunction
 ) {
   if (error instanceof HTTPException) {
-    const detail = error.message;
-    res.status(error.status).json({ detail });
+    return res.status(error.status).json({ erro: error.message });
   }
 
-  const detail = `${error.message} --> Tá tudo bem.`;
-  return res.status(200).json({ detail });
+  if(error instanceof ZodError){
+    return res.status(400).json({erro: "Dados de entrada invalidos"});
+  }
+
 }

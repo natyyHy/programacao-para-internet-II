@@ -2,6 +2,7 @@ import { AtualizarPartida, Partida , Participante,BodyPartida} from '../presenta
 import { JogadorService } from './jogador.service.js'
 import {ParticipanteService} from './participante.service.js'
 import { gerarId } from '../presentation/utils/utils.js'
+import { NotFoundException } from './exceptions/notFoundExcepion.js';
 
 export class PartidaService {
 
@@ -9,14 +10,12 @@ export class PartidaService {
 
     constructor(private jogadorService: JogadorService,private participanteService : ParticipanteService) { }
 
-    public criarPartida(bodyPartida: BodyPartida): Partida | undefined {
+    public criarPartida(bodyPartida: BodyPartida): Partida {
 
-        const organizador = this.jogadorService.buscarJogador(bodyPartida.id_organizador);
+        //ja lanca excecao
+        this.jogadorService.buscarJogador(bodyPartida.id_organizador);
 
-        if (!organizador) {
-            return;
-        }
-
+        //se chegou aqui, jog existe
         this.jogadorService.marcarComoOrganizador(bodyPartida.id_organizador);
 
         const novaPartida: Partida = {
@@ -65,11 +64,11 @@ export class PartidaService {
         return partidasFiltradas;
     }
 
-    public atualizar(idPartida : string, bodyPartida: AtualizarPartida) : Partida | undefined {
+    public atualizar(idPartida : string, bodyPartida: AtualizarPartida) : Partida {
         const partida = this.partidasBD.find(part => part.id_partida === idPartida)
 
         if(!partida){
-            return;
+            throw new NotFoundException(`Partida com o ID ${idPartida} nao foi encontrado`);
         }
 
         if(bodyPartida.nome !== undefined){
@@ -99,27 +98,32 @@ export class PartidaService {
         return partida;
     }
 
-    public desistir(idPartida : string, idJogador : string) : boolean {
+    public desistir(idPartida : string, idJogador : string) {
 
-        const indexParticipante = this.participanteService.buscarParticipante(idPartida,idJogador);
-
-        if(indexParticipante === -1){
-            return false;
-        }
-
-        this.participanteService.removerParticipante(indexParticipante)
-        return true;
-    }
-
-    public buscarPartidaId(idPartida : string) : Partida | undefined {
-        return this.partidasBD.find(part => part.id_partida === idPartida);
-    }
-
-    public listarParticipantes(idPartida : string) : Participante[] | undefined {
         const partida = this.buscarPartidaId(idPartida);
-        if(!partida){
-            return;
+        if (!partida) {
+            throw new NotFoundException(`Partida com o ID ${idPartida} nao foi encontrado`);
         }
+
+        const indexParticipante = this.participanteService.buscarParticipante(idPartida, idJogador);
+
+        if (indexParticipante === -1) {
+            throw new NotFoundException(`Participante com ID ${idJogador} nao foi encontrado na partida ${idPartida}`);
+        }
+
+        this.participanteService.removerParticipante(indexParticipante);
+    }
+
+    public buscarPartidaId(idPartida : string) : Partida{
+        const partida = this.partidasBD.find(part => part.id_partida === idPartida);
+        if(!partida){
+            throw new NotFoundException(`Partida com o ID ${idPartida} nao foi encontrado`);
+        }
+        return partida;
+    }
+
+    public listarParticipantes(idPartida : string) : Participante[] {
+        this.buscarPartidaId(idPartida);
         return this.participanteService.listarPorPartida(idPartida);
     }
 }

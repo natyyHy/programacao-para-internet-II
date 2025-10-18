@@ -4,7 +4,6 @@ import { ParticipanteService } from '../application/participante.service.js';
 import { SolicitacaoService } from './solicitacao.service.js';
 
 
-
 export const jogadorService = new JogadorService();
 export const participanteService = new ParticipanteService();
 export const partidaService = new PartidaService(jogadorService,participanteService);

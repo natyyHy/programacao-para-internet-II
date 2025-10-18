@@ -3,6 +3,7 @@ import { JogadorService } from './jogador.service.js';
 import { PartidaService } from './partida.service.js';
 import {gerarId} from '../presentation/utils/utils.js'
 import { ParticipanteService } from './participante.service.js';
+import { NotFoundException } from './exceptions/notFoundExcepion.js';
 
 export class SolicitacaoService {
 
@@ -12,36 +13,34 @@ export class SolicitacaoService {
         private participanteService : ParticipanteService
     ) { }
 
-    public criar(novaSolicitacao: Solicitacao): Solicitacao | undefined {
+    public criar(novaSolicitacao: Solicitacao): Solicitacao {
         // validar jogador
-        const jogador = this.jogadorService.buscarJogador(novaSolicitacao.id_jogador);
-        if (!jogador) {
-            return;
-        }
+        this.jogadorService.buscarJogador(novaSolicitacao.id_jogador);
 
         // validar partida
-        const partida = this.partidaService.buscarPartidaId(novaSolicitacao.id_partida);
-        if (!partida) {
-            return;
-        }
+        this.partidaService.buscarPartidaId(novaSolicitacao.id_partida);
 
         this.solicitacoesBD.push(novaSolicitacao);
         return novaSolicitacao;
     }
 
-    public buscarSolicitacaoId(idSolicitacao: string): Solicitacao | undefined {
-        return this.solicitacoesBD.find(sol => sol.id_solicitacao === idSolicitacao);
+    public buscarSolicitacaoId(idSolicitacao: string): Solicitacao{
+        const solicitacao = this.solicitacoesBD.find(sol => sol.id_solicitacao === idSolicitacao);
+        if(!solicitacao){
+            throw new NotFoundException(`Solicitacao com o ID ${idSolicitacao} nao foi encontrado`);
+        }
+        return solicitacao;
+
     }
 
-    public aceitar(idSolicitacao: string) : Solicitacao | undefined {
-        const solicitacao = this.solicitacoesBD.find(sol => sol.id_solicitacao === idSolicitacao);
-        if (!solicitacao) {
-            return;
-        }
+    public aceitar(idSolicitacao: string) : Solicitacao {
+        //validar
+        const solicitacao = this.buscarSolicitacaoId(idSolicitacao);
 
         solicitacao.status = 'aceita';
 
         const partidaEncontrada = this.partidaService.buscarPartidaId(solicitacao.id_partida);
+
         const novoParticipante: Participante = {
             id_participante: gerarId(),
             id_partida: solicitacao.id_partida,
@@ -55,17 +54,20 @@ export class SolicitacaoService {
         return solicitacao;
     }
 
-    public recusar(idSolicitacao : string) : Solicitacao | undefined {
-        const solicitacao = this.solicitacoesBD.find(sol => sol.id_solicitacao === idSolicitacao);
-        if (!solicitacao) {
-            return;
-        }
+
+    public recusar(idSolicitacao : string) : Solicitacao {
+        //validar
+        const solicitacao = this.buscarSolicitacaoId(idSolicitacao);
 
         solicitacao.status = 'recusada';
         return solicitacao;
     }
 
-    public listarPorIdPartida(idPartida : string) : Solicitacao[] | undefined {
-        return this.solicitacoesBD.filter(sol => sol.id_partida === idPartida);
+    public listarPorIdPartida(idPartida : string) : Solicitacao[] {
+        const solicitacoes = this.solicitacoesBD.filter(sol => sol.id_partida === idPartida);
+        if(!solicitacoes){
+            throw new NotFoundException(`Nenhuma solicitacao encontrada para essa partida`);
+        }
+        return solicitacoes;
     }
 }
