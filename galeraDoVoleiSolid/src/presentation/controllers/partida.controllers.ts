@@ -1,8 +1,6 @@
-import { PartidaService } from '../../application/partida.service.js'
-import { criarPartidaSchema , paramsSchemaAtualizarPartida, bodySchemaAtualizarPartida,
-    paramsSchemaDesistirPartida
-} from '../schemas/index.js'
-import { ZodError } from 'zod';
+import { PartidaService } from '../../application/partida.service.js';
+import { criarPartidaSchema , paramsSchemaAtualizarPartida, bodySchemaAtualizarPartida } from '../schemas/index.js';
+
 import type { NextFunction, Request, Response } from "express";
 
 export class PartidaController {

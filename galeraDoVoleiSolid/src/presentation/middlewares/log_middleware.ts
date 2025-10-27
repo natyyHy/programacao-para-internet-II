@@ -5,8 +5,6 @@ export const log_middleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const mensagem = "Olá, tudo bem?!";
-  console.log(`LOG: METHOD: ${req.method} PATH: ${req.path}`);
-  // res.status(200).json({ mensagem });
+  console.log(`🟢 LOG: METHOD: ${req.method} PATH: ${req.path}`);
   next();
 };

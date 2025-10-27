@@ -72,10 +72,27 @@
 
 ![Desistir da Partida](printsInsomnia/desistirpartida.jpg)
 
-O projeto anterior viola:
-    S (Single Responsibility): Cada classe/função deve ter uma única responsabilidade
-    O (Open/Closed): Código aberto para extensão, fechado para modificação
-    D (Dependency Inversion): Depender de abstrações, não implementações
+## Violações SOLID do Projeto Anterior vs Melhorias Implementadas
 
-✅ Service = APENAS regras de negócio
-✅ Controller = APENAS receber request/enviar response
+### **Problemas do Projeto Anterior:**
+- **S (Single Responsibility)**: Controllers misturavam lógica de negócio com tratamento HTTP
+- **O (Open/Closed)**: Código rígido, difícil de estender sem modificar classes existentes  
+- **D (Dependency Inversion)**: Dependências diretas entre camadas, acoplamento forte
+
+### ✅ **Melhorias na Nova Versão:**
+
+#### **Single Responsibility Principle (SRP)**
+- **Controllers**: Apenas recebem requests HTTP e enviam responses
+- **Services**: Exclusivamente para regras de negócio e validações
+- **Middlewares**: Responsabilidades específicas (auth, logs, tratamento de erros)
+
+#### **Open/Closed Principle (OCP)**
+- **Arquitetura em camadas**: Facilita extensão de funcionalidades
+- **Middlewares modulares**: Novos middlewares podem ser adicionados sem modificar código existente
+- **Services independentes**: Novas regras de negócio podem ser implementadas sem afetar outras
+
+#### **Dependency Inversion Principle (DIP)**  
+- **Injeção de Dependência**: Services são injetados nos controllers
+- **Desacoplamento**: Controllers não conhecem implementação dos services
+- **Instâncias centralizadas**: Services criados em `serviceInstances.ts` para controle único
+

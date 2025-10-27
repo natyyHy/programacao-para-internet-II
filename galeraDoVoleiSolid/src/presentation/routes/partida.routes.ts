@@ -11,7 +11,11 @@ const solicitacaoController = new SolicitacaoController(solicitacaoService);
 const participanteController = new ParticipanteController(partidaService);
 
 //publico
+
+//get listar partidas
 partida_router.get('/', partidaController.listar);
+
+//get participantes da partida
 partida_router.get('/:id_partida/participantes', participanteController.listarParticipantes);
 
 
